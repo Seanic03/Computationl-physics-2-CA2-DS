@@ -22,11 +22,12 @@ def H(x):
 
 # Parameters
 x0 = 0.0         # Initial state
-steps = 10000    # Number of iterations
+steps = 1000    # Number of iterations
 delta = 1.0      # Step size
 B_values = [1, 2, 3, 4]  # Different inverse temperature parameters
+bin_size = 10    # Number of samples per bin
 
-plt.figure(figsize=(12, 10))
+plt.figure(figsize=(12, 15))
 
 for i, B in enumerate(B_values, 1):
     # Run Metropolis algorithm
@@ -41,8 +42,11 @@ for i, B in enumerate(B_values, 1):
     # Compute running average to show thermalization
     running_avg = np.cumsum(samples) / np.arange(1, len(samples) + 1)
     
+    # Bin the samples
+    binned_samples = np.array(samples).reshape(-1, bin_size).mean(axis=1)
+    
     # Plot histogram of sampled values
-    plt.subplot(4, 2, 2 * (i - 1) + 1)
+    plt.subplot(4, 3, 3 * (i - 1) + 1)
     plt.hist(samples, bins=50, density=True, alpha=0.6, color='b', label=f'B={B} Samples')
     
     # Theoretical distribution (Boltzmann-like)
@@ -61,13 +65,23 @@ for i, B in enumerate(B_values, 1):
     plt.title(f'Metropolis Sampling for H(x) = x^2, B={B}')
     
     # Plot running average to show thermalization
-    plt.subplot(4, 2, 2 * (i - 1) + 2)
+    plt.subplot(4, 3, 3 * (i - 1) + 2)
     plt.plot(running_avg, label='Running Average', color='b')
     plt.axhline(expectation_H, color='r', linestyle='--', label='Final Expectation Value')
     plt.xlabel('Steps')
     plt.ylabel('Running Average of x')
     plt.legend()
     plt.title(f'Thermalization for B={B}')
+    
+    # Plot binned samples
+    plt.subplot(4, 3, 3 * (i - 1) + 3)
+    plt.plot(binned_samples, label='Binned Samples', color='m')
+    plt.axhline(expectation_H, color='r', linestyle='--', label='Final Expectation Value')
+    plt.xlabel('Binned Steps')
+    plt.ylabel('Binned Sample Mean')
+    plt.legend()
+    plt.title(f'Binned Samples for B={B}')
 
 plt.tight_layout()
 plt.show()
+
