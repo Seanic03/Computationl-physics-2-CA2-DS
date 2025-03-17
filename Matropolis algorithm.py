@@ -45,7 +45,7 @@ def H(x):
 
 # Parameters
 T=300
-x0 = 0.0         # Initial state
+x0 = 0.1         # Initial state
 steps = 10000    # Number of iterations
 B= 1        # Temperature parameter
 delta = 1.0      # Step size
