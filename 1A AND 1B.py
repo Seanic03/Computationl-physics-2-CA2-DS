@@ -36,9 +36,9 @@ for i, B in enumerate(beta, 1):
     
     
     x = np.linspace(-5, 5, N) #giving x an arbitary range over the number of steps taken
-    p_x = np.exp(-H(x) *B)  # Partition function proportionality
-    norm = np.trapz(p_x, x)  # Normalize the distribution
-    result = p_x / norm  # Normalized distribution
+    p_x = np.exp(-H(x) *B)  
+    norm = np.trapz(p_x, x) 
+    result = p_x / norm 
     
     
     plt.subplot(4, 3, 3 * (i - 1) + 1)
