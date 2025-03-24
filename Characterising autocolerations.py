@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def metropolis(H, x0, steps, B, delta):
-    """Metropolis algorithm for sampling from a given energy function H(x)."""
     x = x0
     samples = []
     
@@ -18,15 +17,10 @@ def metropolis(H, x0, steps, B, delta):
     return np.array(samples)
 
 def autocorrelation(samples, max_tau):
-    """Compute the autocorrelation function C(tau)."""
     mean = np.mean(samples)
     var = np.var(samples)
-    C_tau = np.array([np.mean((samples[:-tau] - mean) * (samples[tau:] - mean)) / var for tau in range(1, max_tau)])
-    return C_tau
-
-def integrated_autocorrelation(C_tau):
-    """Compute the integrated autocorrelation time tau_int."""
-    return 1 + 2 * np.sum(C_tau)
+    C_tau = np.array([np.mean((samples[:len(samples)-tau] - mean) * (samples[tau:] - mean)) for tau in range(max_tau)])
+    return C_tau / var
 
 # Define energy function H(x) = x^2
 def H(x):
@@ -36,61 +30,64 @@ def H(x):
 x0 = 0.0         # Initial state
 steps = 5000     # Number of iterations
 delta = 1.0      # Step size
-B = 1            # Inverse temperature
-bin_size = 10    # Number of samples per bin
-max_tau = 100    # Maximum tau for autocorrelation
+B = 2.0          # Fixed inverse temperature
+bin_sizes = [1, 5, 10, 50, 100]  # Different bin sizes for comparison
+max_tau = 100
 
 # Run Metropolis algorithm
 samples = metropolis(H, x0, steps, B, delta)
+H_values = H(samples)
 
-# Compute autocorrelation function
-C_tau = autocorrelation(samples, max_tau)
+# Compute autocorrelation
+C_tau = autocorrelation(H_values, max_tau)
 
-# Compute integrated autocorrelation time
-tau_int = integrated_autocorrelation(C_tau)
+tau_int = 1 + 2 * np.sum(C_tau)
 
-# Binning procedure
-binned_samples = samples[:steps//bin_size * bin_size].reshape(-1, bin_size).mean(axis=1)
-
-# Compute expectation values and errors
-H_values = np.array([H(x) for x in samples])
-H_values_binned = np.array([H(x) for x in binned_samples])
-
-expectation_H = np.mean(H_values)
-std_error_H = np.std(H_values, ddof=1) / np.sqrt(len(H_values))
-
-expectation_H_binned = np.mean(H_values_binned)
-std_error_H_binned = np.std(H_values_binned, ddof=1) / np.sqrt(len(H_values_binned))
+# Compute binned statistics
+errors = []
+for bin_size in bin_sizes:
+    binned_samples = samples[:len(samples)//bin_size * bin_size].reshape(-1, bin_size).mean(axis=1)
+    std_H_binned = np.std(H(binned_samples), ddof=1)
+    std_error_H_binned = std_H_binned / np.sqrt(len(binned_samples))
+    errors.append(std_error_H_binned)
 
 # Plot results
-fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+plt.figure(figsize=(12, 10))
 
-# Autocorrelation function
-axes[0].plot(range(1, max_tau), C_tau, marker='o', linestyle='-', color='b', label='C(τ)')
-axes[0].set_xlabel('τ')
-axes[0].set_ylabel('Autocorrelation C(τ)')
-axes[0].set_title(f'Autocorrelation Function (τ_int ≈ {tau_int:.2f})')
-axes[0].legend()
+# Plot autocorrelation function
+plt.subplot(2, 2, 1)
+plt.plot(C_tau, marker='o', linestyle='-', label='Autocorrelation')
+plt.axhline(0, color='gray', linestyle='--')
+plt.xlabel(r'$\tau$')
+plt.ylabel(r'$C(\tau)$')
+plt.title('Autocorrelation Function')
+plt.legend()
 
-# Binning comparison
-axes[1].plot(samples, label='Non-Binned Samples', color='g', alpha=0.5, linewidth=1)
-axes[1].plot(np.arange(0, len(samples), bin_size), binned_samples, label='Binned Samples', color='m', linewidth=2)
-axes[1].axhline(expectation_H_binned, color='r', linestyle='--', label=f'Binned ⟨H(x)⟩={expectation_H_binned:.3f} ± {std_error_H_binned:.3f}')
-axes[1].axhline(expectation_H, color='b', linestyle='--', label=f'{expectation_H:.3f} ± {std_error_H:.3f}')
-axes[1].set_xlabel('Steps')
-axes[1].set_ylabel('Sample Mean')
-axes[1].set_title('Binned vs. Non-Binned Comparison')
-axes[1].legend()
+# Plot binned error estimate
+plt.subplot(2, 2, 2)
+plt.plot(bin_sizes, errors, marker='o', linestyle='-', label='Binned Standard Error')
+plt.xlabel('Bin Size')
+plt.ylabel('Standard Error')
+plt.title('Standard Error vs Bin Size')
+plt.legend()
 
-# Binned error analysis
-bin_sizes = np.arange(1, 100, 5)
-errors = [np.std(samples[:steps//b] * b, ddof=1) / np.sqrt(len(samples[:steps//b] // b)) for b in bin_sizes]
+# Plot raw samples
+plt.subplot(2, 2, 3)
+plt.plot(samples[:500], label='Raw Samples', alpha=0.7)
+plt.xlabel('Step')
+plt.ylabel('x')
+plt.title('Metropolis Sampled Values')
+plt.legend()
 
-axes[2].plot(bin_sizes, errors, marker='o', linestyle='-', color='r', label='Estimated Error')
-axes[2].set_xlabel('Bin Size τ')
-axes[2].set_ylabel('Estimated Error')
-axes[2].set_title('Error vs. Bin Size')
-axes[2].legend()
+# Histogram of sampled values
+plt.subplot(2, 2, 4)
+plt.hist(samples, bins=50, density=True, alpha=0.6, color='b', label='Sampled Distribution')
+plt.xlabel('x')
+plt.ylabel('Density')
+plt.title('Histogram of Sampled Values')
+plt.legend()
 
 plt.tight_layout()
 plt.show()
+
+print(f'Estimated Integrated Autocorrelation Time: {tau_int:.2f}')
