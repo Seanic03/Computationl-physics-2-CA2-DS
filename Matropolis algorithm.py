@@ -78,21 +78,13 @@ for i, B in enumerate(B_values, 1):
     plt.legend()
     plt.title(f'Thermalization for B={B}')
     
-    # Plot binned samples
-    plt.subplot(4, 4, 4 * (i - 1) + 3)
-    plt.plot(binned_samples, label='Binned Samples', color='m', linewidth=1)
-    plt.axhline(np.mean(binned_samples), color='r', linestyle='--', label=f'⟨H(x)⟩ = {expectation_H_binned:.3f} ± {std_error_H_binned:.3f}')
-    plt.xlabel('Binned Steps')
-    plt.ylabel('Binned Sample Mean')
-    plt.legend()
-    plt.title(f'Binned Samples for B={B}')
     
     # Plot comparison between binned and non-binned samples
-    plt.subplot(4, 4, 4 * (i - 1) + 4)
+    plt.subplot(4, 4, 4 * (i - 1) + 3)
     plt.plot(samples, label='Non-Binned Samples', color='g', alpha=0.5, linewidth=1)
     plt.plot(np.arange(0, len(samples), bin_size), binned_samples, label='Binned Samples', color='m', linewidth=2)
-    plt.axhline(np.mean(binned_samples), color='r', linestyle='--', label=f'Binned ⟨H(x)⟩ ± {std_error_H_binned:.3f}')
-    plt.axhline(np.mean(H_values), color='b', linestyle='--', label=f'Non-Binned ⟨H(x)⟩ ± {std_error_H:.3f}')
+    plt.axhline(np.mean(binned_samples), color='r', linestyle='--', label=f'Binned ⟨H(x)⟩={expectation_H_binned:.3f} ± {std_error_H_binned:.3f}')
+    plt.axhline(np.mean(H_values), color='b', linestyle='--', label=f'{expectation_H} ± {std_error_H:.3f}')
     plt.xlabel('Steps')
     plt.ylabel('Sample Mean')
     plt.legend()
