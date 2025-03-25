@@ -1,3 +1,5 @@
+#Sean Drake 2217895
+# Github Seanic03
 import numpy as np
 import matplotlib.pyplot as plt
 
