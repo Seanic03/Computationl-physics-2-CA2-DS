@@ -24,7 +24,7 @@ def detect_equilibrium(samples, window=500):
     for i in range(window, len(samples)):
         recent_avg = np.mean(running_avg[i-window:i])
         previous_avg = np.mean(running_avg[i-2*window:i-window])
-        if np.abs(recent_avg - previous_avg) < 0.01 * np.abs(previous_avg):
+        if np.abs(recent_avg - previous_avg) < 0.001 * np.abs(previous_avg):
             return i
     
     return 0
