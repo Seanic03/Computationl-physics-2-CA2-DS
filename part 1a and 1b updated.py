@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 25 13:10:04 2025
 
-@author: jay_s
-"""
-
-#student number 2115701
 
 
 import numpy as np
@@ -13,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Defining parameters
 x_0 = 1 # Initial position
-N = 5000  # Number of steps
+N = 10000  # Number of steps
 delta = 1.0  #only set to 1 to increase step size
 beta = [1, 2, 3, 4]  # List of values beta can be for example where beta =1/k*T shows inverse temperature relation
 bin_size = 10
@@ -34,6 +27,16 @@ def metropolis(H, x0, steps, beta, delta): #defining metropolis function
         answers.append(x)  # appends the values to the empty list that answers equals
     return answers # just gives values stored in answers =[]
 
+def detect_equilibrium(samples, window=1000):
+    running_avg = np.cumsum(answers) / np.arange(1, len(answers) + 1)
+    
+    for i in range(window, len(answers)):
+        recent_avg = np.mean(running_avg[i-window:i])
+        previous_avg = np.mean(running_avg[i-2*window:i-window])
+        if np.abs(recent_avg - previous_avg) < 0.01 * np.abs(previous_avg):
+            return i
+    
+    return 0
 
 plt.figure(figsize=(14, 12)) #size of plots in x and y direction
 plt.suptitle("Metropolis program for different values of beta ", fontsize=16) #main title
@@ -74,7 +77,7 @@ for i, B in enumerate(beta, 1):
     plt.subplot(4, 3, 3 * (i - 1) + 2)
     plt.plot(running_avg, color='blue', label='Running Average', linewidth=1.5)
     plt.axhline(np.mean(running_avg), color='red', linestyle='--', label='Mean', linewidth=1.5)
-    plt.title(f"weighted data from histogram for β = {B}", fontsize=12)
+    plt.title(f"Thermalization for β = {B}", fontsize=12)
     plt.xlabel("Steps", fontsize=10)
     plt.ylabel("Average", fontsize=10)
     plt.legend(fontsize=8)
