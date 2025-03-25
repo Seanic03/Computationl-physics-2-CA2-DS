@@ -30,9 +30,9 @@ def H(x):
 x0 = 0.0         # Initial state
 steps = 5000     # Number of iterations
 delta = 1.0      # Step size
-B = 2.0          # Fixed inverse temperature
-bin_sizes = [1, 5, 10, 50, 100]  # Different bin sizes for comparison
-max_tau = 100
+B = 1.0          # Fixed inverse temperature
+bin_sizes = [1, 5, 10, 15, 20,25,30,35,40,45,50,50,60]  # Different bin sizes for comparison
+max_tau = 50
 
 # Run Metropolis algorithm
 samples = metropolis(H, x0, steps, B, delta)
@@ -65,7 +65,7 @@ plt.legend()
 
 # Plot binned error estimate
 plt.subplot(2, 2, 2)
-plt.plot(bin_sizes, errors, marker='o', linestyle='-', label='Binned Standard Error')
+plt.scatter(bin_sizes, errors, marker='o', label='Binned Standard Error')
 plt.xlabel('Bin Size')
 plt.ylabel('Standard Error')
 plt.title('Standard Error vs Bin Size')
